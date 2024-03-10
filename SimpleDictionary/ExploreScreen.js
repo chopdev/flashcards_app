@@ -5,9 +5,9 @@ import axios from 'axios';
 const ExploreScreen = () => {
   const [sets, setSets] = useState([]);
 
-  useEffect(() => {
+  /*useEffect(() => {
     fetchSets();
-  }, []);
+  }, []); */
 
   const fetchSets = async () => {
     try {

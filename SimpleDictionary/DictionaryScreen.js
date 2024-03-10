@@ -1,6 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button } from 'react-native';
+import { View, Text, Button, ScrollView, StyleSheet } from 'react-native';
 import axios from 'axios';
+import {parseToWords} from './parsers/jsonParser'
+import testData from './parsers/test_export.json'
+
+const styles = StyleSheet.create({
+  wordContainer: {
+    marginBottom: 10,
+  },
+  engText: {
+    fontSize: 18,
+    fontWeight: 'bold'
+  },
+  translationsText: {
+    fontSize: 16,
+    fontStyle: 'italic'
+  },
+});
 
 const DictionaryScreen = () => {
   const [words, setWords] = useState([]);
@@ -11,8 +27,13 @@ const DictionaryScreen = () => {
 
   const fetchWords = async () => {
     try {
-      const response = await axios.get('your-backend-url/dictionary');
-      setWords(response.data);
+      //const response = await axios.get('your-backend-url/dictionary');
+      //
+
+      console.log('start reading');
+      const words = await parseToWords(testData);
+      setWords(words);
+
     } catch (error) {
       console.error('Error fetching words:', error);
     }
@@ -23,17 +44,16 @@ const DictionaryScreen = () => {
   };
 
   return (
-    <View>
-      <Text>Dictionary</Text>
+    <ScrollView>
       {words.map((word, index) => (
-        <View key={index}>
-          <Text>{word.word}</Text>
-          <Text>{word.translation}</Text>
+        <View style={styles.wordContainer} key={index}>
+          <Text style={styles.engText}>{word.eng}</Text>
+          <Text style={styles.translationsText}>{word.translations}</Text>
           {/* Add button to play pronunciation */}
-        </View>
+      </View>
       ))}
       <Button title="Add Word" onPress={addWord} />
-    </View>
+    </ScrollView>
   );
 };
 

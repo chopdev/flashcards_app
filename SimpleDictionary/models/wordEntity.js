@@ -1,5 +1,5 @@
 export class Word {
-    constructor(eng, translations, examples) {
+    constructor(eng, translations, transcription, examples) {
         if (eng == null || eng == '') {
             throw new Error('Word cannot be empty');
         }
@@ -9,11 +9,16 @@ export class Word {
 
         this._eng = eng;
         this._translations = translations;
+        this._transcription = transcription;
         this._examples = examples;
     }
 
     get eng() {
         return this._eng;
+    }
+
+    get transcription() {
+        return this._transcription;
     }
 
     get translations() {

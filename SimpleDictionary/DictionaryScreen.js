@@ -4,6 +4,8 @@ import axios from 'axios';
 import {parseToWords} from './parsers/jsonParser'
 import testData from './parsers/test_export.json'
 import Modal from "react-native-modal";
+import { Word } from './models/wordEntity';
+import * as Speech from 'expo-speech';
 
 const styles = StyleSheet.create({
   container: {
@@ -79,6 +81,9 @@ const DictionaryScreen = () => {
     fetchWords();
   }, []);
 
+  // Disable Save button if English word is empty
+  const isSaveDisabled = !newWord.eng.trim() || !newWord.translation.trim();
+
   const addExample = () => {
     if (newWord.examples.length < 4) {
       setNewWord(prevState => ({
@@ -126,17 +131,21 @@ const DictionaryScreen = () => {
       // });
       // setPictureAssociation(pictureResponse.data.pictureUrl);
 
-      if (!newWord.eng || !newWord.translation) {
+      if (isSaveDisabled) {
         return;
       }
 
       // After fetching proposed translation and picture association, add the new word to the dictionary
-      const updatedWords = [...words, newWord];
+
+      console.log("adding word: " + JSON.stringify(newWord))
+      const wordEntity = new Word(newWord.eng, newWord.translation, newWord.transcription, newWord.examples);
+     
+      const updatedWords = [wordEntity, ...words];
       setWords(updatedWords);
       setNewWord({
         eng: '',
-        transcription: '',
         translation: '',
+        transcription: '',
         examples: [],
       });
       // Close the modal after adding the word
@@ -168,7 +177,7 @@ const DictionaryScreen = () => {
           <View style={styles.wordContainer} key={index}>
             <Text style={styles.engText}>{word.eng}</Text>
             <Text style={styles.translationsText}>{word.translations}</Text>
-            {/* Add button to play pronunciation */}
+            <Button title="Play" onPress={() => Speech.speak(word.eng)} />
         </View>
         ))}
       </ScrollView>}
@@ -184,18 +193,18 @@ const DictionaryScreen = () => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <View style={styles.buttonsContainer}>
-              <Button title="Save" onPress={handleAddWord} />
+              <Button title="Save" onPress={handleAddWord} disabled={isSaveDisabled} />
               <Button title="Cancel" onPress={() => handleModalVisible(false)} />
             </View>
             <TextInput
               style={styles.input}
-              placeholder="English word"
+              placeholder="English word*"
               value={newWord.eng}
               onChangeText={(text) => setNewWord(prevState => ({ ...prevState, eng: text }))}
             />
             <TextInput
               style={styles.input}
-              placeholder="Translation"
+              placeholder="Translation*"
               value={newWord.translation}
               onChangeText={(text) => setNewWord(prevState => ({ ...prevState, translation: text }))}
             />

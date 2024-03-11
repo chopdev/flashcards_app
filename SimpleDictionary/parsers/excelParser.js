@@ -1,5 +1,5 @@
 import xlsx from 'xlsx';
-import Word from '../models/wordEntity';
+import { Word } from '../models/wordEntity';
 
 const rowSeparator = '\n\n';
 const fieldSeparator = ';;';

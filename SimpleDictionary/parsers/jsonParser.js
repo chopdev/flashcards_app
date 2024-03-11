@@ -1,4 +1,4 @@
-import {Word}  from '../models/wordEntity';
+import { Word } from '../models/wordEntity';
 
 const cyrillicPattern = /[а-яА-ЯЁё]/;
 

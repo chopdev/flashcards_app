@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, ScrollView, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Button, FlatList, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import axios from 'axios';
 import {parseToWords} from './parsers/jsonParser'
 import testData from './parsers/test_export.json'
@@ -12,7 +12,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   wordContainer: {
+    flexDirection: 'row',
     marginBottom: 10,
+    justifyContent: "space-between",
+    alignItems: 'center',
+    paddingLeft: 10,
+    paddingRight: 10
   },
   engText: {
     fontSize: 18,
@@ -171,23 +176,22 @@ const DictionaryScreen = () => {
   console.log('Render DictionaryScreen. Modal visible: ' + modalVisible)
   return (
     <View style={styles.container}>
-      {!modalVisible && <ScrollView>
-        <Button title="Add Word" onPress={() => handleModalVisible(true)} />
-        {words.map((word, index) => (
-          <View style={styles.wordContainer} key={index}>
-            <Text style={styles.engText}>{word.eng}</Text>
-            <Text style={styles.translationsText}>{word.translations}</Text>
-            <Button title="Play" onPress={() => Speech.speak(word.eng)} />
-        </View>
-        ))}
-      </ScrollView>}
+      <Button title="Add Word" onPress={() => handleModalVisible(true)} />
+      {!modalVisible && <FlatList
+        data={words}
+        renderItem={({ item }) => <View style={styles.wordContainer}>
+                                    <View>
+                                      <Text style={styles.engText}>{item.eng}</Text>
+                                      <Text style={styles.translationsText}>{item.translations}</Text>
+                                    </View>
+                                    <Button title="Play" onPress={() => Speech.speak(item.eng)} />
+                              </View>}
+      />}
       <Modal
         isVisible={modalVisible}
         swipeDirection={['down']}
         onSwipeComplete={() => handleModalVisible(false)}
-        //onBackdropPress={() => setModalVisible(false)}
         style={styles.modal}
-        //backdropColor="light grey"
         backdropOpacity={0.5}
       >
         <View style={styles.modalContainer}>

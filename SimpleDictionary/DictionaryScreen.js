@@ -6,6 +6,7 @@ import testData from './parsers/test_export.json'
 import Modal from "react-native-modal";
 import { Word } from './models/wordEntity';
 import * as Speech from 'expo-speech';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const styles = StyleSheet.create({
   container: {
@@ -42,8 +43,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 10,
   },
+  playBtn: {
+    width: 20,
+  },
   addButtonText: {
-    color: 'white',
+    color: '#007AFF',
     fontSize: 16,
   },
   modal: {
@@ -184,7 +188,9 @@ const DictionaryScreen = () => {
                                       <Text style={styles.engText}>{item.eng}</Text>
                                       <Text style={styles.translationsText}>{item.translations}</Text>
                                     </View>
-                                    <Button title="Play" onPress={() => Speech.speak(item.eng)} />
+                                    <TouchableOpacity style={styles.playBtn} onPress={() => Speech.speak(item.eng)}>
+                                      <Icon name="play" size={18} color="#007AFF" />
+                                    </TouchableOpacity>
                               </View>}
       />}
       <Modal
@@ -205,18 +211,21 @@ const DictionaryScreen = () => {
               placeholder="English word*"
               value={newWord.eng}
               onChangeText={(text) => setNewWord(prevState => ({ ...prevState, eng: text }))}
+              maxLength={60}
             />
             <TextInput
               style={styles.input}
               placeholder="Translation*"
               value={newWord.translation}
               onChangeText={(text) => setNewWord(prevState => ({ ...prevState, translation: text }))}
+              maxLength={120}
             />
             <TextInput
               style={styles.input}
               placeholder="Transcription (optional)"
               value={newWord.transcription}
               onChangeText={(text) => setNewWord(prevState => ({ ...prevState, transcription: text }))}
+              maxLength={80}
             />
             {newWord.examples.map((example, index) => (
               <TextInput
@@ -225,6 +234,7 @@ const DictionaryScreen = () => {
                 placeholder={`Example ${index + 1}`}
                 value={example}
                 onChangeText={(text) => handleExampleChange(text, index)}
+                maxLength={500}
               />
             ))}
             <TouchableOpacity style={styles.addButton} onPress={addExample}>

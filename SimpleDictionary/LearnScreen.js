@@ -5,6 +5,7 @@ import Swipeable from 'react-native-gesture-handler/Swipeable';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import testData from './parsers/test_export.json'
 import { Word } from './models/wordEntity';
+import DeckSwiper from 'react-native-deck-swiper';
 
 // Add your styles here
 const styles = StyleSheet.create({
@@ -26,6 +27,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 5,
+    borderBottomWidth: 2,
+    borderColor: "black"
   },
   translationText: {
     fontSize: 24,
@@ -49,12 +52,18 @@ const styles = StyleSheet.create({
   pickerContainer: {
     marginBottom: 20,
   },
+  buttonContainer: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    zIndex: 1,
+  },
 });
 
 const LearnScreen = () => {
   const [wordsToLearn, setWordsToLearn] = useState(undefined);
+  const [cards, setCards] = useState(undefined);
   const [selectedCount, setSelectedCount] = useState(10);
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
@@ -69,6 +78,8 @@ const LearnScreen = () => {
       //const wordEntity = new Word(newWord.eng, newWord.translation, newWord.transcription, newWord.examples);
       setWordsToLearn([
         { eng: 'Hello', translation: 'Hola', transcription: 'həˈləʊ', examples: ['Hello, how are you?'], pictureUrl: 'example-url' },
+        { eng: 'Hello2', translation: 'Hola2', transcription: 'həˈləʊ', examples: ['Hello, how are you?'], pictureUrl: 'example-url' },
+        { eng: 'Hello3', translation: 'Hola3', transcription: 'həˈləʊ', examples: ['Hello, how are you?'], pictureUrl: 'example-url' },
       ]);
     } catch (error) {
       console.error('Error fetching words:', error);
@@ -76,26 +87,29 @@ const LearnScreen = () => {
   };
 
   const handleStartLearning = () => {
-    setCurrentWordIndex(0);
-    setShowDetails(false);
+    setCards(wordsToLearn);
   };
 
-  const handleSwipe = (direction) => {
+  const handleCloseDeck = () => {
+    setCards(null);
+  }
+
+  const handleSwipe = (isDirectionRight) => {
     setShowDetails(false);
-    if (direction === 'right') {
+    if (isDirectionRight) {
       // Logic for known word
     } else {
       // Logic for unknown word
     }
-    if (currentWordIndex < wordsToLearn.length - 1) {
-      setCurrentWordIndex(currentWordIndex + 1);
-    }
   };
 
-  const renderFlashcard = () => {
+  const handleSwipedAll = () => {
+    console.log('all swiped');
+    setCards(null);
+  };
+
+  const renderFlashcard = (word) => {
     console.log("Rendering flashcard");
-    console.log(wordsToLearn);
-    const word = wordsToLearn[currentWordIndex];
     return (
       <View style={styles.flashcard}>
         <Text style={styles.translationText}>{word.translation}</Text>
@@ -120,12 +134,26 @@ const LearnScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Button title="Start" onPress={handleStartLearning} />
-      {wordsToLearn && <Swipeable
-        onSwipeableRightOpen={() => handleSwipe('right')}
-        onSwipeableLeftOpen={() => handleSwipe('left')}>
-        {renderFlashcard()}
-      </Swipeable>}
+      {cards ? (
+      <>
+        <View style={styles.buttonContainer}>
+        <Button title="< Back" onPress={handleCloseDeck} />
+      </View>
+        <DeckSwiper
+          cards={cards}
+          renderCard={(card) => renderFlashcard(card)}
+          onSwipedLeft={() => handleSwipe(false)}
+          onSwipedRight={() => handleSwipe(true)}
+          onSwipedAll={() => handleSwipedAll()}
+          backgroundColor='transparent'
+        />
+      </>
+    ) : (
+      <>
+        <Button title="Start" onPress={handleStartLearning} />
+        <Text>TODO: Add range selection here</Text>
+      </>
+    )}
     </View>
   );
 };

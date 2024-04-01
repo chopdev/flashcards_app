@@ -7,6 +7,7 @@ import {parseToWords} from './parsers/jsonParser'
 import testData from './parsers/test_export.json'
 import { Word } from './models/wordEntity';
 import DeckSwiper from 'react-native-deck-swiper';
+import RangeSlider from 'react-native-range-slider-expo';
 
 // Add your styles here
 const styles = StyleSheet.create({
@@ -68,7 +69,11 @@ const LearnScreen = () => {
   const [cards, setCards] = useState(undefined);
   const [selectedCount, setSelectedCount] = useState(10);
   const [cardIndex, setCardIndex] = useState(null);
-  
+  const [showTranslation, setShowTranslation] = useState(false);
+
+  const [minWordIndex, setMinWordIndex] = useState(0);
+  const [maxWordIndex, setMaxWordIndex] = useState(0);
+
   useEffect(() => {
     fetchWordsToLearn();
   }, []);
@@ -78,10 +83,8 @@ const LearnScreen = () => {
       // const response = await axios.get(`url/words?count=${selectedCount}`);
 
       console.log('Loading words');
-      //const wordEntity = new Word(newWord.eng, newWord.translation, newWord.transcription, newWord.examples);
       const words = await parseToWords(testData);
-      const wordsWithDetails = words.map(word => ({ eng: word.eng, translations: word.translations, transcription: word.transcription, examples: word.examples, showDetails: false }));
-      setWordsToLearn(wordsWithDetails);
+      setWordsToLearn(words);
     } catch (error) {
       console.error('Error fetching words:', error);
     }
@@ -89,15 +92,18 @@ const LearnScreen = () => {
 
   const handleStartLearning = () => {
     setCards(wordsToLearn);
+    setShowTranslation(false);
   };
 
   const handleCloseDeck = () => {
     setCards(null);
     setCardIndex(null);
+    setShowTranslation(false);
   }
 
   const handleSwipe = (isDirectionRight) => {
     console.log('Handle swipe to ' + (isDirectionRight ? 'right' : 'left'));
+    setShowTranslation(false);
     if (isDirectionRight) {
       // Logic for known word
     } else {
@@ -113,9 +119,7 @@ const LearnScreen = () => {
 
   const handleShowCardDetails = (index) => {
     console.log("ShowCardDetails clicked for index: " + index);
-    const updatedWords = [...wordsToLearn];
-    updatedWords[index].showDetails = true;
-    setCards(updatedWords);
+    setShowTranslation(true);
     setCardIndex(index)
   };
 
@@ -124,7 +128,7 @@ const LearnScreen = () => {
     return (
       <View style={styles.flashcard} key={index}>
         <Text style={styles.translationText}>{word.translations}</Text>
-        {word.showDetails && (
+        {showTranslation && (
           <>
             <Text style={styles.detailText}>{word.eng}</Text>
             {word.transcription && <Text style={styles.detailText}>{word.transcription}</Text>}
@@ -163,7 +167,12 @@ const LearnScreen = () => {
     ) : (
       <>
         <Button title="Start" onPress={handleStartLearning} />
-        <Text>TODO: Add range selection here</Text>
+        <Text>Select range of words from your dictionary to learn:</Text>
+        {wordsToLearn && <RangeSlider min={1} max={wordsToLearn.length}
+                         fromValueOnChange={value => setMinWordIndex(value)}
+                         toValueOnChange={value => setMaxWordIndex(value)}
+                         initialFromValue={11}
+        />}
       </>
     )}
     </View>

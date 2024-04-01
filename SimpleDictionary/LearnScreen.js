@@ -3,6 +3,7 @@ import { View, Text, Button, Modal, TouchableOpacity, Image, StyleSheet, FlatLis
 import axios from 'axios';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import {parseToWords} from './parsers/jsonParser'
 import testData from './parsers/test_export.json'
 import { Word } from './models/wordEntity';
 import DeckSwiper from 'react-native-deck-swiper';
@@ -12,23 +13,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-  },
-  cardContainer: {
-    flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center', 
   },
   flashcard: {
-    width: 300,
-    height: 400,
+    flex: 1,
+    marginBottom: 70,
     backgroundColor: 'white',
     borderRadius: 10,
     padding: 20,
     justifyContent: 'center',
     alignItems: 'center',
-    elevation: 5,
-    borderBottomWidth: 2,
-    borderColor: "black"
+    elevation: 5, // for Android shadow
+    shadowColor: "black", // for iOS shadow
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   translationText: {
     fontSize: 24,
@@ -64,8 +67,8 @@ const LearnScreen = () => {
   const [wordsToLearn, setWordsToLearn] = useState(undefined);
   const [cards, setCards] = useState(undefined);
   const [selectedCount, setSelectedCount] = useState(10);
-  const [showDetails, setShowDetails] = useState(false);
-
+  const [cardIndex, setCardIndex] = useState(null);
+  
   useEffect(() => {
     fetchWordsToLearn();
   }, []);
@@ -76,11 +79,9 @@ const LearnScreen = () => {
 
       console.log('Loading words');
       //const wordEntity = new Word(newWord.eng, newWord.translation, newWord.transcription, newWord.examples);
-      setWordsToLearn([
-        { eng: 'Hello', translation: 'Hola', transcription: 'həˈləʊ', examples: ['Hello, how are you?'], pictureUrl: 'example-url' },
-        { eng: 'Hello2', translation: 'Hola2', transcription: 'həˈləʊ', examples: ['Hello, how are you?'], pictureUrl: 'example-url' },
-        { eng: 'Hello3', translation: 'Hola3', transcription: 'həˈləʊ', examples: ['Hello, how are you?'], pictureUrl: 'example-url' },
-      ]);
+      const words = await parseToWords(testData);
+      const wordsWithDetails = words.map(word => ({ eng: word.eng, translations: word.translations, transcription: word.transcription, examples: word.examples, showDetails: false }));
+      setWordsToLearn(wordsWithDetails);
     } catch (error) {
       console.error('Error fetching words:', error);
     }
@@ -92,10 +93,11 @@ const LearnScreen = () => {
 
   const handleCloseDeck = () => {
     setCards(null);
+    setCardIndex(null);
   }
 
   const handleSwipe = (isDirectionRight) => {
-    setShowDetails(false);
+    console.log('Handle swipe to ' + (isDirectionRight ? 'right' : 'left'));
     if (isDirectionRight) {
       // Logic for known word
     } else {
@@ -106,18 +108,27 @@ const LearnScreen = () => {
   const handleSwipedAll = () => {
     console.log('all swiped');
     setCards(null);
+    setCardIndex(null);
   };
 
-  const renderFlashcard = (word) => {
-    console.log("Rendering flashcard");
+  const handleShowCardDetails = (index) => {
+    console.log("ShowCardDetails clicked for index: " + index);
+    const updatedWords = [...wordsToLearn];
+    updatedWords[index].showDetails = true;
+    setCards(updatedWords);
+    setCardIndex(index)
+  };
+
+  const renderFlashcard = (word, index) => {
+    console.log("Rendering flashcard with index " + index + ", word: " + word.translations);
     return (
-      <View style={styles.flashcard}>
-        <Text style={styles.translationText}>{word.translation}</Text>
-        {showDetails && (
+      <View style={styles.flashcard} key={index}>
+        <Text style={styles.translationText}>{word.translations}</Text>
+        {word.showDetails && (
           <>
             <Text style={styles.detailText}>{word.eng}</Text>
             {word.transcription && <Text style={styles.detailText}>{word.transcription}</Text>}
-            {word.examples.map((example, index) => (
+            {word.examples && word.examples.map((example, index) => (
               <Text key={index} style={styles.detailText}>{example}</Text>
             ))}
             {word.pictureUrl && <Image source={{ uri: word.pictureUrl }} style={styles.image} />}
@@ -125,7 +136,7 @@ const LearnScreen = () => {
         )}
         <TouchableOpacity
           style={styles.eyeButton}
-          onPress={() => setShowDetails(true)}>
+          onPress={() => handleShowCardDetails(index)}>
           <Icon name="eye" size={24} />
         </TouchableOpacity>
       </View>
@@ -135,19 +146,20 @@ const LearnScreen = () => {
   return (
     <View style={styles.container}>
       {cards ? (
-      <>
-        <View style={styles.buttonContainer}>
-        <Button title="< Back" onPress={handleCloseDeck} />
-      </View>
         <DeckSwiper
+          childrenOnTop={true}
           cards={cards}
-          renderCard={(card) => renderFlashcard(card)}
+          cardIndex={cardIndex}
+          renderCard={(card, index) => renderFlashcard(card, index)}
           onSwipedLeft={() => handleSwipe(false)}
           onSwipedRight={() => handleSwipe(true)}
           onSwipedAll={() => handleSwipedAll()}
-          backgroundColor='transparent'
-        />
-      </>
+          backgroundColor='transperent'
+        >
+          <View style={styles.buttonContainer}>
+            <Button title="< Back" onPress={handleCloseDeck} />
+          </View>
+        </DeckSwiper>
     ) : (
       <>
         <Button title="Start" onPress={handleStartLearning} />

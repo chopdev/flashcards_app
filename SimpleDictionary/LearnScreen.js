@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, Modal, TouchableOpacity, Image, StyleSheet, FlatList } from 'react-native';
 import axios from 'axios';
-import Swipeable from 'react-native-gesture-handler/Swipeable';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {parseToWords} from './parsers/jsonParser'
 import testData from './parsers/test_export.json'
 import { Word } from './models/wordEntity';
 import DeckSwiper from 'react-native-deck-swiper';
-import RangeSlider from 'react-native-range-slider-expo';
 
 // Add your styles here
 const styles = StyleSheet.create({
@@ -168,11 +166,7 @@ const LearnScreen = () => {
       <>
         <Button title="Start" onPress={handleStartLearning} />
         <Text>Select range of words from your dictionary to learn:</Text>
-        {wordsToLearn && <RangeSlider min={1} max={wordsToLearn.length}
-                         fromValueOnChange={value => setMinWordIndex(value)}
-                         toValueOnChange={value => setMaxWordIndex(value)}
-                         initialFromValue={11}
-        />}
+        {wordsToLearn && <Text>TODO: paste range selector here</Text>}
       </>
     )}
     </View>

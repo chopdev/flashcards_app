@@ -6,6 +6,8 @@ import {parseToWords} from './parsers/jsonParser'
 import testData from './parsers/test_export.json'
 import { Word } from './models/wordEntity';
 import DeckSwiper from 'react-native-deck-swiper';
+import RangeSlider from 'rn-range-slider';
+import {sliderStyles, Rail, Thumb, RailSelected} from './common/rangePicker'
 
 // Add your styles here
 const styles = StyleSheet.create({
@@ -69,8 +71,8 @@ const LearnScreen = () => {
   const [cardIndex, setCardIndex] = useState(null);
   const [showTranslation, setShowTranslation] = useState(false);
 
-  const [minWordIndex, setMinWordIndex] = useState(0);
-  const [maxWordIndex, setMaxWordIndex] = useState(0);
+  const [minWord, setMinWord] = useState(1);
+  const [maxWord, setMaxWord] = useState(100);
 
   useEffect(() => {
     fetchWordsToLearn();
@@ -83,13 +85,14 @@ const LearnScreen = () => {
       console.log('Loading words');
       const words = await parseToWords(testData);
       setWordsToLearn(words);
+      setMaxWord(words.length);
     } catch (error) {
       console.error('Error fetching words:', error);
     }
   };
 
   const handleStartLearning = () => {
-    setCards(wordsToLearn);
+    setCards(wordsToLearn.slice(minWord - 1, maxWord));
     setShowTranslation(false);
   };
 
@@ -163,11 +166,28 @@ const LearnScreen = () => {
           </View>
         </DeckSwiper>
     ) : (
-      <>
+      <View>
         <Button title="Start" onPress={handleStartLearning} />
-        <Text>Select range of words from your dictionary to learn:</Text>
-        {wordsToLearn && <Text>TODO: paste range selector here</Text>}
-      </>
+        <Text style={{marginTop: 40}}>Select range of words from your dictionary to learn:</Text>
+        {wordsToLearn && <View style={sliderStyles.sliderContainer}>
+          <RangeSlider
+            style={sliderStyles.rangeSlider}
+            min={1}
+            max={wordsToLearn.length}
+            step={1}
+            floatingLabel
+            renderThumb={Thumb}
+            renderRail={Rail}
+            renderRailSelected={RailSelected}
+            onValueChanged={(minWord, maxWord) => {
+              setMinWord(minWord);
+              setMaxWord(maxWord);
+            }}
+          />
+          <Text style={sliderStyles.valueLabel}>Min word: {minWord}</Text>
+          <Text style={sliderStyles.valueLabel}>Max word: {maxWord}</Text>
+        </View>}
+      </View>
     )}
     </View>
   );

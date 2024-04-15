@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, FlatList, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, Button, FlatList, TextInput, TouchableOpacity, StyleSheet, Platform} from 'react-native';
 import axios from 'axios';
 import {parseToWords} from './parsers/jsonParser'
 import testData from './parsers/test_export.json'
 import Modal from "react-native-modal";
 import { Word } from './models/wordEntity';
 import * as Speech from 'expo-speech';
+import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from "expo-av";
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 const styles = StyleSheet.create({
@@ -88,6 +89,20 @@ const DictionaryScreen = () => {
 
   useEffect(() => {
     fetchWords();
+
+    const setAudioSettings = async () => {
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+        allowsRecordingIOS: false,
+        staysActiveInBackground: false,
+        interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+        interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+        playThroughEarpieceAndroid: false,
+        shouldDuckAndroid: false,
+      });
+    };
+
+    setAudioSettings();
   }, []);
 
   // Disable Save button if English word is empty

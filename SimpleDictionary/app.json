@@ -2,6 +2,7 @@
   "expo": {
     "name": "SimpleDictionary",
     "slug": "SimpleDictionary",
+    "owner": "chopdev",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -15,7 +16,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.chopdev.SimpleDictionary"
     },
     "android": {
       "adaptiveIcon": {
@@ -25,6 +27,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "05750c98-25b7-487d-aecb-ad3c3b7c8f5e"
+      }
     }
   }
 }

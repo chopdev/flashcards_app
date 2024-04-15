@@ -10,7 +10,7 @@ export class Word {
         this._eng = eng;
         this._translations = translations;
         this._transcription = transcription;
-        this._examples = examples;
+        this._examples = Array.isArray(examples) ? examples : examples ? examples.split(';') : [];
     }
 
     get eng() {

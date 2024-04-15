@@ -8,6 +8,7 @@ import { Word } from './models/wordEntity';
 import * as Speech from 'expo-speech';
 import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from "expo-av";
 import Icon from 'react-native-vector-icons/FontAwesome';
+import {fetchWords, persistWord} from './repository/sqlLight';
 
 const styles = StyleSheet.create({
   container: {
@@ -88,7 +89,17 @@ const DictionaryScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
-    fetchWords();
+    const loadAllWords = async () => {
+      try {
+        console.log('Getting words');
+        //const words = await parseToWords(testData);
+        const words = await fetchWords();
+        setWords(words);
+  
+      } catch (error) {
+        console.error('Error fetching words:', error);
+      }
+    };
 
     const setAudioSettings = async () => {
       await Audio.setAudioModeAsync({
@@ -102,6 +113,7 @@ const DictionaryScreen = () => {
       });
     };
 
+    loadAllWords();
     setAudioSettings();
   }, []);
 
@@ -163,7 +175,8 @@ const DictionaryScreen = () => {
 
       console.log("adding word: " + JSON.stringify(newWord))
       const wordEntity = new Word(newWord.eng, newWord.translation, newWord.transcription, newWord.examples);
-     
+      await persistWord(wordEntity);
+
       const updatedWords = [wordEntity, ...words];
       setWords(updatedWords);
       setNewWord({
@@ -178,19 +191,6 @@ const DictionaryScreen = () => {
       console.error('Error adding word:', error);
     }
   }; 
-
-  const fetchWords = async () => {
-    try {
-      //const response = await axios.get('your-backend-url/dictionary');
-
-      console.log('Getting words');
-      const words = await parseToWords(testData);
-      setWords(words);
-
-    } catch (error) {
-      console.error('Error fetching words:', error);
-    }
-  };
 
   console.log('Render DictionaryScreen. Modal visible: ' + modalVisible)
   return (
@@ -226,6 +226,7 @@ const DictionaryScreen = () => {
               placeholder="English word*"
               value={newWord.eng}
               onChangeText={(text) => setNewWord(prevState => ({ ...prevState, eng: text }))}
+              autoCapitalize="none"
               maxLength={60}
             />
             <TextInput
@@ -233,6 +234,7 @@ const DictionaryScreen = () => {
               placeholder="Translation*"
               value={newWord.translation}
               onChangeText={(text) => setNewWord(prevState => ({ ...prevState, translation: text }))}
+              autoCapitalize="none"
               maxLength={120}
             />
             <TextInput
@@ -240,6 +242,7 @@ const DictionaryScreen = () => {
               placeholder="Transcription (optional)"
               value={newWord.transcription}
               onChangeText={(text) => setNewWord(prevState => ({ ...prevState, transcription: text }))}
+              autoCapitalize="none"
               maxLength={80}
             />
             {newWord.examples.map((example, index) => (
@@ -249,6 +252,7 @@ const DictionaryScreen = () => {
                 placeholder={`Example ${index + 1}`}
                 value={example}
                 onChangeText={(text) => handleExampleChange(text, index)}
+                autoCapitalize="none"
                 maxLength={500}
               />
             ))}

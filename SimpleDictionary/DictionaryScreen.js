@@ -9,6 +9,7 @@ import * as Speech from 'expo-speech';
 import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from "expo-av";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {fetchWords, persistWord} from './repository/sqlLight';
+import { translate } from '@vitalets/google-translate-api';
 
 const styles = StyleSheet.create({
   container: {
@@ -88,6 +89,9 @@ const DictionaryScreen = () => {
   const [pictureAssociation, setPictureAssociation] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
 
+  // TODO: take language from settings
+  const language = 'uk';
+
   useEffect(() => {
     const loadAllWords = async () => {
       try {
@@ -116,6 +120,19 @@ const DictionaryScreen = () => {
     loadAllWords();
     setAudioSettings();
   }, []);
+
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      if (newWord.eng.trim() !== '' && newWord.eng.trim().length >= 3) {
+        console.log("Translating word: " + newWord.eng); 
+        translate(newWord.eng, { to: language }).then((res) => 
+            setNewWord(prevState => ({ ...prevState, translation: res.text}))
+        );
+      }
+    }, 2000);
+
+    return () => clearTimeout(debounceTimer);
+  }, [newWord.eng]);
 
   // Disable Save button if English word is empty
   const isSaveDisabled = !newWord.eng.trim() || !newWord.translation.trim();

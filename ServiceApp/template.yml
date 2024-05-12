@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Serverless Translation Service
+
+Resources:
+  TranslationApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+
+  TranslationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.lambda_handler
+      Runtime: python3.9
+      CodeUri: ./function/
+      Policies:
+        - AWSLambdaBasicExecutionRole
+      Events:
+        GetTranslation:
+          Type: Api
+          Properties:
+            Path: /translate
+            Method: get
+            RestApiId: !Ref TranslationApi
+
+Outputs:
+  ApiUrl:
+    Description: "API Gateway endpoint URL for Lambda translation"
+    Value: !Sub "https://${TranslationApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/translate"

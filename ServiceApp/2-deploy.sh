@@ -8,6 +8,9 @@ ARTIFACT_BUCKET=$(cat bucket-name.txt)
 # Build the SAM application using Docker to match Lambda's environment
 #sam build --use-container
 
+# Build the SAM application. Output files are placed into "./.aws-sam" folder
+sam build --template-file template.yml
+
 # Package the application
 sam package \
     --output-template-file packaged.yml \

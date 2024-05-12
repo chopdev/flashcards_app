@@ -1,1 +1,4 @@
 bucket-name.txt
+packaged.yml
+
+.aws-sam/

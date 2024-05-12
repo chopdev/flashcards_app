@@ -9,7 +9,6 @@ import * as Speech from 'expo-speech';
 import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from "expo-av";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {fetchWords, persistWord} from './repository/sqlLight';
-import { translate } from '@vitalets/google-translate-api';
 
 const styles = StyleSheet.create({
   container: {
@@ -125,9 +124,6 @@ const DictionaryScreen = () => {
     const debounceTimer = setTimeout(() => {
       if (newWord.eng.trim() !== '' && newWord.eng.trim().length >= 3) {
         console.log("Translating word: " + newWord.eng); 
-        translate(newWord.eng, { to: language }).then((res) => 
-            setNewWord(prevState => ({ ...prevState, translation: res.text}))
-        );
       }
     }, 2000);
 

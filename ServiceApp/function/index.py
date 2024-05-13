@@ -3,8 +3,10 @@ from googletrans import Translator
 
 def lambda_handler(event, context):
     text = event['queryStringParameters']['text']
-    
-    translated_text = translate_text(text)
+    from_lang = event['queryStringParameters'].get('fromLang', 'en')
+    to_lang = event['queryStringParameters'].get('toLang', 'uk')
+
+    translated_text = translate_text(text, from_lang, to_lang)
     return {
         'statusCode': 200,
         'headers': {
@@ -17,6 +19,6 @@ def lambda_handler(event, context):
         })
     }
 
-def translate_text(text):
+def translate_text(text, from_lang, to_lang):
     translator = Translator()
-    return translator.translate('leech', 'uk', 'en').text
+    return translator.translate(text, to_lang, from_lang).text
